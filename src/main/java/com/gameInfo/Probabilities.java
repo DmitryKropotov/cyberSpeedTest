@@ -3,25 +3,39 @@ package com.gameInfo;
 import java.util.Map;
 
 public class Probabilities {
-    StandardSymbol[] standard_symbols;
+    private StandardSymbols[] standard_symbols;
     //private int row;
     private BonusSymbols bonus_symbols;
 
-    private class BonusSymbols {
-        Map<String, Integer> symbols;
+
+    public abstract class Symbols {
+        private Map<String, Integer> symbols;
+
+        public Map<String, Integer> getSymbols() {
+            return symbols;
+        }
     }
 
-    class StandardSymbol {
+    public class StandardSymbols extends Symbols {
         private int column;
         private int row;
-        private Map<String, Integer> symbols;
 
-        // Add getters and setters
+        public int getColumn() {
+            return column;
+        }
+
+        public int getRow() {
+            return row;
+        }
     }
 
-    class BonusSymbol {
-        private Map<String, Integer> symbols;
+    public class BonusSymbols extends Symbols {}
 
-        // Add getters and setters
+    public StandardSymbols[] getStandard_symbols() {
+        return standard_symbols;
+    }
+
+    public BonusSymbols getBonus_symbols() {
+        return bonus_symbols;
     }
 }
