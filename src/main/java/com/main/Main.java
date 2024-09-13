@@ -98,10 +98,10 @@ public class Main {
 
 
         int betAmount = 100;
-        int reward = 0;
+        double reward = 0;
         for (int i = 0; i < standardSymbols.size(); i++) {
             reward += betAmount*standardRewards.get(standardSymbols.get(i))*
-                    repeatsOfStandartSymbols.get(standardSymbols.get(i));
+                    rewardForSameSymbols.getOrDefault(repeatsOfStandartSymbols.get(standardSymbols.get(i)), 0.0);
         }
 
         List<String> appliedBonusSymbols = new ArrayList<>();
@@ -133,7 +133,7 @@ public class Main {
         System.out.println("reward:" + reward + ",");
         System.out.println("applied_winning_combinations: {");
         repeatsOfStandartSymbols.forEach((symbol, repeat) -> {
-            if(repeat>0) {
+            if(rewardForSameSymbols.containsKey(repeat)) {
                 System.out.println(symbol + ": [ dame_symbol_" + repeat + "_times],");
             }
         });
