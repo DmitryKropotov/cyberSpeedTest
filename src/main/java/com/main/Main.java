@@ -40,7 +40,7 @@ public class Main {
         List<String> bonusMultiplySymbols = bonusRewardsMultiply.keySet().stream().collect(Collectors.toList());
         List<String> bonusAddSymbols = bonusRewardsAdd.keySet().stream().collect(Collectors.toList());
 
-        String[][] matrix = new String[game.getColumns()][game.getRows()];
+        String[][] matrix = new String[game.getRows()][game.getColumns()];
         Probabilities.StandardSymbols[] probabilitiesOfStandardSymbols = game.getProbabilities().getStandard_symbols();
         for (Probabilities.StandardSymbols standardSymbol : probabilitiesOfStandardSymbols) {
             matrix[standardSymbol.getRow()][standardSymbol.getColumn()] = generateSymbol(standardSymbol);
@@ -57,18 +57,10 @@ public class Main {
                     matrix[i][j] = generateSymbol(game.getProbabilities().getBonus_symbols());
                     if(!matrix[i][j].equals("MISS")) {
                         if(matrix[i][j].contains("x")) {
-                            if (!repeatsOfMultiplyBonusSymbols.containsKey(matrix[i][j])) {
-                                repeatsOfMultiplyBonusSymbols.put(matrix[i][j], 1);
-                            } else {
-                                repeatsOfMultiplyBonusSymbols.put(matrix[i][j], repeatsOfMultiplyBonusSymbols.get(matrix[i][j]) + 1);
-                            }
+                         repeatsOfMultiplyBonusSymbols.put(matrix[i][j], repeatsOfMultiplyBonusSymbols.getOrDefault(matrix[i][j], 0) + 1);
                         }
                         if(matrix[i][j].contains("+")) {
-                            if (!repeatsOfAddBonusSymbols.containsKey(matrix[i][j])) {
-                                repeatsOfAddBonusSymbols.put(matrix[i][j], 1);
-                            } else {
-                                repeatsOfAddBonusSymbols.put(matrix[i][j], repeatsOfAddBonusSymbols.get(matrix[i][j]) + 1);
-                            }
+                          repeatsOfAddBonusSymbols.put(matrix[i][j], repeatsOfAddBonusSymbols.getOrDefault(matrix[i][j], 0) + 1);
                         }
                     }
                 }
@@ -86,22 +78,36 @@ public class Main {
         rewardForSameSymbols.put(9, (Double)winCombination.getSame_symbol_9_times().get("reward_multiplier"));
 
 
-        //optional part
         double rewardForSameSymbolsHorizontally = (double)winCombination.getSame_symbols_horizontally().get("reward_multiplier");
-        List<?> coveredAreasHorizontally = (List<?>) winCombination.getSame_symbols_horizontally().get("covered_areas");
+        List<List<String>> coveredAreasHorizontally = (List<List<String>>) winCombination.getSame_symbols_horizontally().get("covered_areas");
         double rewardForSameSymbolsVertically = (double)winCombination.getSame_symbols_vertically().get("reward_multiplier");
-        List<?> coveredAreasVertically = (List<?>) winCombination.getSame_symbols_vertically().get("covered_areas");
+        List<List<String>> coveredAreasVertically = (List<List<String>>) winCombination.getSame_symbols_vertically().get("covered_areas");
         double rewardForSameSymbolsDiagonallyLeftToRight = (double)winCombination.getSame_symbols_diagonally_left_to_right().get("reward_multiplier");
-        List<?> coveredAreasDiagonallyLeftToRight = (List<?>) winCombination.getSame_symbols_diagonally_left_to_right().get("covered_areas");
+        List<List<String>> coveredAreasDiagonallyLeftToRight = (List<List<String>>) winCombination.getSame_symbols_diagonally_left_to_right().get("covered_areas");
         double rewardForSameSymbolsDiagonallyRightToLeft = (double)winCombination.getSame_symbols_diagonally_right_to_left().get("reward_multiplier");
-        List<?> coveredAreasDiagonallyRightToLeft = (List<?>) winCombination.getSame_symbols_diagonally_right_to_left().get("covered_areas");
+        List<List<String>> coveredAreasDiagonallyRightToLeft = (List<List<String>>) winCombination.getSame_symbols_diagonally_right_to_left().get("covered_areas");
+
+        Map<String, Integer> symbolsHorizontallyCounter = countPatternMatchForSymbols(coveredAreasHorizontally, standardSymbols, matrix);
+        Map<String, Integer> symbolsVerticallyCounter = countPatternMatchForSymbols(coveredAreasVertically, standardSymbols, matrix);
+        Map<String, Integer> symbolsDiagonallyLeftToRightCounter = countPatternMatchForSymbols(coveredAreasDiagonallyLeftToRight, standardSymbols, matrix);
+        Map<String, Integer> symbolsDiagonallyRightToLeftCounter = countPatternMatchForSymbols(coveredAreasDiagonallyRightToLeft, standardSymbols, matrix);
 
 
         int betAmount = 100;
         double reward = 0;
         for (int i = 0; i < standardSymbols.size(); i++) {
-            reward += betAmount*standardRewards.get(standardSymbols.get(i))*
+            double rewardForSameSymbol = betAmount*standardRewards.get(standardSymbols.get(i))*
                     rewardForSameSymbols.getOrDefault(repeatsOfStandartSymbols.get(standardSymbols.get(i)), 0.0);
+            double sameSVHor = Math.pow(rewardForSameSymbolsHorizontally, symbolsHorizontallyCounter.getOrDefault(standardSymbols.get(i), 0));
+            double sameSVer = Math.pow(rewardForSameSymbolsVertically, symbolsVerticallyCounter.getOrDefault(standardSymbols.get(i), 0));
+            double sameSLR = Math.pow(rewardForSameSymbolsDiagonallyLeftToRight, symbolsDiagonallyLeftToRightCounter.getOrDefault(standardSymbols.get(i), 0));
+            double sameSRL = Math.pow(rewardForSameSymbolsDiagonallyRightToLeft, symbolsDiagonallyRightToLeftCounter.getOrDefault(standardSymbols.get(i), 0));
+            reward += betAmount*standardRewards.get(standardSymbols.get(i))*
+                    rewardForSameSymbols.getOrDefault(repeatsOfStandartSymbols.get(standardSymbols.get(i)), 0.0)*
+                    Math.pow(rewardForSameSymbolsHorizontally, symbolsHorizontallyCounter.getOrDefault(standardSymbols.get(i), 0))*
+                    Math.pow(rewardForSameSymbolsVertically, symbolsVerticallyCounter.getOrDefault(standardSymbols.get(i), 0))*
+                    Math.pow(rewardForSameSymbolsDiagonallyLeftToRight, symbolsDiagonallyLeftToRightCounter.getOrDefault(standardSymbols.get(i), 0))*
+                    Math.pow(rewardForSameSymbolsDiagonallyRightToLeft, symbolsDiagonallyRightToLeftCounter.getOrDefault(standardSymbols.get(i), 0));
         }
 
         List<String> appliedBonusSymbols = new ArrayList<>();
@@ -122,11 +128,10 @@ public class Main {
             }
         }
 
-        //(bet_amount x reward(symbol_A) x reward(same_symbol_5_times) x reward(same_symbols_vertically)) + (bet_amount x reward(symbol_B) x reward(same_symbol_3_times) x reward(same_symbols_vertically)) (+/x) reward(+1000) = (100 x5 x5 x2) + (100 x3 x1 x2) + 1000 = 5000 + 600 + 1000 = 6600
 
-        for (String[] column : matrix) {
-            for (String row : column) {
-                System.out.print(row + " ");
+        for (String[] row : matrix) {
+            for (String column : row) {
+                System.out.print(column + " ");
             }
             System.out.println();
         }
@@ -134,7 +139,20 @@ public class Main {
         System.out.println("applied_winning_combinations: {");
         repeatsOfStandartSymbols.forEach((symbol, repeat) -> {
             if(rewardForSameSymbols.containsKey(repeat)) {
-                System.out.println(symbol + ": [ dame_symbol_" + repeat + "_times],");
+                System.out.print(symbol + ": [same_symbol_" + repeat + "_times");
+                if(symbolsHorizontallyCounter.containsKey(symbol)) {
+                    System.out.print(", same_symbols_horizontally");
+                }
+                if(symbolsVerticallyCounter.containsKey(symbol)) {
+                    System.out.print(", same_symbols_vertically");
+                }
+                if(symbolsDiagonallyLeftToRightCounter.containsKey(symbol)) {
+                    System.out.print(", same_symbols_diagonally_left_to_right");
+                }
+                if(symbolsDiagonallyRightToLeftCounter.containsKey(symbol)) {
+                    System.out.print(", same_symbols_diagonally_right_to_left");
+                }
+                System.out.println("]");
             }
         });
         System.out.println("}");
@@ -163,5 +181,31 @@ public class Main {
             }
         }
         return entries[entries.length-1].getKey();
+    }
+
+    private static Map<String, Integer> countPatternMatchForSymbols(List<List<String>> coordinatesPattern,
+                                        List<String> standardSymbols, String[][] matrix) {
+        Map<String, Integer> symbolsHorizontallyCounter = new HashMap();
+        coordinatesPattern.forEach(list -> {
+            int[][] allCoordinates = new int[list.size()][2];
+            for (int i = 0; i < list.size(); i++) {
+                int[] coordinates = Arrays.stream(list.get(i).split(":")).mapToInt(c -> Integer.valueOf(c)).toArray();
+                allCoordinates[i] = coordinates;
+            }
+            String symbol = matrix[allCoordinates[0][0]][allCoordinates[0][1]];
+            boolean match = true;
+            if(standardSymbols.contains(symbol)) {
+                for(int i = 1; i < allCoordinates.length; i++) {
+                    if(!matrix[allCoordinates[i][0]][allCoordinates[i][1]].equals(symbol)) {
+                        match = false;
+                        break;
+                    }
+                }
+            }
+            if(match) {
+                symbolsHorizontallyCounter.put(symbol, symbolsHorizontallyCounter.getOrDefault(symbol,0) + 1);
+            }
+        });
+        return symbolsHorizontallyCounter;
     }
 }
