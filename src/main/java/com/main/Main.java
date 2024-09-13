@@ -96,12 +96,6 @@ public class Main {
         int betAmount = 100;
         double reward = 0;
         for (int i = 0; i < standardSymbols.size(); i++) {
-            double rewardForSameSymbol = betAmount*standardRewards.get(standardSymbols.get(i))*
-                    rewardForSameSymbols.getOrDefault(repeatsOfStandartSymbols.get(standardSymbols.get(i)), 0.0);
-            double sameSVHor = Math.pow(rewardForSameSymbolsHorizontally, symbolsHorizontallyCounter.getOrDefault(standardSymbols.get(i), 0));
-            double sameSVer = Math.pow(rewardForSameSymbolsVertically, symbolsVerticallyCounter.getOrDefault(standardSymbols.get(i), 0));
-            double sameSLR = Math.pow(rewardForSameSymbolsDiagonallyLeftToRight, symbolsDiagonallyLeftToRightCounter.getOrDefault(standardSymbols.get(i), 0));
-            double sameSRL = Math.pow(rewardForSameSymbolsDiagonallyRightToLeft, symbolsDiagonallyRightToLeftCounter.getOrDefault(standardSymbols.get(i), 0));
             reward += betAmount*standardRewards.get(standardSymbols.get(i))*
                     rewardForSameSymbols.getOrDefault(repeatsOfStandartSymbols.get(standardSymbols.get(i)), 0.0)*
                     Math.pow(rewardForSameSymbolsHorizontally, symbolsHorizontallyCounter.getOrDefault(standardSymbols.get(i), 0))*
@@ -129,37 +123,46 @@ public class Main {
         }
 
 
+        System.out.println("{");
+        System.out.println("matrix: [");
         for (String[] row : matrix) {
-            for (String column : row) {
-                System.out.print(column + " ");
+            System.out.print("[");
+            for (String val : row) {
+                System.out.print(val + " ");
             }
-            System.out.println();
+            System.out.println("],");
         }
-        System.out.println("reward:" + reward + ",");
-        System.out.println("applied_winning_combinations: {");
-        repeatsOfStandartSymbols.forEach((symbol, repeat) -> {
-            if(rewardForSameSymbols.containsKey(repeat)) {
-                System.out.print(symbol + ": [same_symbol_" + repeat + "_times");
-                if(symbolsHorizontallyCounter.containsKey(symbol)) {
-                    System.out.print(", same_symbols_horizontally");
+        System.out.println("],");
+        System.out.print("reward: " + reward);
+        if(reward>0) {
+            System.out.println(",");
+            System.out.println("applied_winning_combinations: {");
+            repeatsOfStandartSymbols.forEach((symbol, repeat) -> {
+                if(rewardForSameSymbols.containsKey(repeat)) {
+                    System.out.print(symbol + ": [same_symbol_" + repeat + "_times");
+                    if(symbolsHorizontallyCounter.containsKey(symbol)) {
+                        System.out.print(", same_symbols_horizontally");
+                    }
+                    if(symbolsVerticallyCounter.containsKey(symbol)) {
+                        System.out.print(", same_symbols_vertically");
+                    }
+                    if(symbolsDiagonallyLeftToRightCounter.containsKey(symbol)) {
+                        System.out.print(", same_symbols_diagonally_left_to_right");
+                    }
+                    if(symbolsDiagonallyRightToLeftCounter.containsKey(symbol)) {
+                        System.out.print(", same_symbols_diagonally_right_to_left");
+                    }
+                    System.out.println("]");
                 }
-                if(symbolsVerticallyCounter.containsKey(symbol)) {
-                    System.out.print(", same_symbols_vertically");
-                }
-                if(symbolsDiagonallyLeftToRightCounter.containsKey(symbol)) {
-                    System.out.print(", same_symbols_diagonally_left_to_right");
-                }
-                if(symbolsDiagonallyRightToLeftCounter.containsKey(symbol)) {
-                    System.out.print(", same_symbols_diagonally_right_to_left");
-                }
-                System.out.println("]");
-            }
-        });
+            });
+            System.out.println("},");
+            System.out.print("applied bonus symbol:");
+            appliedBonusSymbols.forEach(appliedBonusSymbol -> {
+                System.out.print(" " + appliedBonusSymbol);
+            });
+        }
+        System.out.println();
         System.out.println("}");
-        System.out.print("applied bonus symbol:");
-        appliedBonusSymbols.forEach(appliedBonusSymbol -> {
-            System.out.print(" " + appliedBonusSymbol);
-        });
     }
 
     private static String generateSymbol(Probabilities.Symbols symbols) {
