@@ -14,7 +14,8 @@ import java.util.stream.IntStream;
 
 public class Main {
     public static void main(String[] args) throws FileNotFoundException {
-        String filePath = "config.json";
+        String filePath = (args.length >= 2 && args[1].endsWith(".json"))? args[1]: "config.json";
+        int betAmount = (args.length >= 4 && isInteger(args[3]))? Integer.valueOf(args[3]): 100;
 
         Gson gson = new Gson();
         FileReader reader = new FileReader(filePath);
@@ -93,7 +94,6 @@ public class Main {
         Map<String, Integer> symbolsDiagonallyRightToLeftCounter = countPatternMatchForSymbols(coveredAreasDiagonallyRightToLeft, standardSymbols, matrix);
 
 
-        int betAmount = 100;
         double reward = 0;
         for (int i = 0; i < standardSymbols.size(); i++) {
             reward += betAmount*standardRewards.get(standardSymbols.get(i))*
@@ -163,6 +163,15 @@ public class Main {
         }
         System.out.println();
         System.out.println("}");
+    }
+
+    private static boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private static String generateSymbol(Probabilities.Symbols symbols) {
