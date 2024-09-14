@@ -1,8 +1,6 @@
 package com.main;
 
-import com.gameInfo.Game;
-import com.gameInfo.Probabilities;
-import com.gameInfo.WinCombination;
+import com.gameInfo.*;
 import com.google.gson.Gson;
 
 import java.io.FileNotFoundException;
@@ -13,12 +11,18 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) {
         String filePath = (args.length >= 2 && args[1].endsWith(".json"))? args[1]: "config.json";
         int betAmount = (args.length >= 4 && isInteger(args[3]))? Integer.valueOf(args[3]): 100;
 
         Gson gson = new Gson();
-        FileReader reader = new FileReader(filePath);
+        FileReader reader = null;
+        try {
+            reader = new FileReader(filePath);
+        } catch (FileNotFoundException e) {
+            System.out.println(("File " + filePath + " is not found. Please provide correct file name"));
+            return;
+        }
         Game game = gson.fromJson(reader, Game.class);
 
         Map<String, Double> standardRewards = new HashMap<>();
@@ -42,8 +46,8 @@ public class Main {
         List<String> bonusAddSymbols = bonusRewardsAdd.keySet().stream().collect(Collectors.toList());
 
         String[][] matrix = new String[game.getRows()][game.getColumns()];
-        Probabilities.StandardSymbols[] probabilitiesOfStandardSymbols = game.getProbabilities().getStandard_symbols();
-        for (Probabilities.StandardSymbols standardSymbol : probabilitiesOfStandardSymbols) {
+        StandardSymbols[] probabilitiesOfStandardSymbols = game.getProbabilities().getStandard_symbols();
+        for (StandardSymbols standardSymbol : probabilitiesOfStandardSymbols) {
             matrix[standardSymbol.getRow()][standardSymbol.getColumn()] = generateSymbol(standardSymbol);
             repeatsOfStandartSymbols.put(matrix[standardSymbol.getRow()][standardSymbol.getColumn()],
                     repeatsOfStandartSymbols.get(matrix[standardSymbol.getRow()][standardSymbol.getColumn()])+1);
@@ -124,22 +128,22 @@ public class Main {
 
 
         System.out.println("{");
-        System.out.println("matrix: [");
+        System.out.println(" matrix: [");
         for (String[] row : matrix) {
-            System.out.print("[");
-            for (String val : row) {
-                System.out.print(val + " ");
+            System.out.print("  [");
+            for (int i = 0; i < row.length; i++) {
+                System.out.print(row[i] + ((i<row.length-1) ? ", ": ""));
             }
             System.out.println("],");
         }
-        System.out.println("],");
-        System.out.print("reward: " + reward);
+        System.out.println(" ],");
+        System.out.print(" reward: " + reward);
         if(reward>0) {
             System.out.println(",");
-            System.out.println("applied_winning_combinations: {");
+            System.out.println(" applied_winning_combinations: {");
             repeatsOfStandartSymbols.forEach((symbol, repeat) -> {
                 if(rewardForSameSymbols.containsKey(repeat)) {
-                    System.out.print(symbol + ": [same_symbol_" + repeat + "_times");
+                    System.out.print("  " + symbol + ": [same_symbol_" + repeat + "_times");
                     if(symbolsHorizontallyCounter.containsKey(symbol)) {
                         System.out.print(", same_symbols_horizontally");
                     }
@@ -155,11 +159,14 @@ public class Main {
                     System.out.println("]");
                 }
             });
-            System.out.println("},");
-            System.out.print("applied bonus symbol:");
-            appliedBonusSymbols.forEach(appliedBonusSymbol -> {
-                System.out.print(" " + appliedBonusSymbol);
-            });
+            System.out.print(" }");
+            if(appliedBonusSymbols.size()>0) {
+                System.out.println(",");
+                System.out.print(" applied bonus symbol:");
+                for (int i = 0; i < appliedBonusSymbols.size(); i++) {
+                    System.out.print((i!=0?",":"") + " " + appliedBonusSymbols.get(i));
+                }
+            }
         }
         System.out.println();
         System.out.println("}");
@@ -174,7 +181,7 @@ public class Main {
         }
     }
 
-    private static String generateSymbol(Probabilities.Symbols symbols) {
+    private static String generateSymbol(Symbols symbols) {
         Map<String, Integer> symbolProbabilities = symbols.getSymbols();
         int sum = 0;
         for (int value : symbolProbabilities.values()) {
