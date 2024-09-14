@@ -5,6 +5,8 @@ import com.google.gson.Gson;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.security.SecureRandom;
 import java.util.stream.Collectors;
@@ -12,15 +14,15 @@ import java.util.stream.IntStream;
 
 public class Main {
     public static void main(String[] args) {
-        String filePath = (args.length >= 2 && args[1].endsWith(".json"))? args[1]: "config.json";
-        int betAmount = (args.length >= 4 && isInteger(args[3]))? Integer.valueOf(args[3]): 100;
+        final String FILE_PATH = (args.length >= 2 && args[1].endsWith(".json"))? args[1]: "config.json";
+        final int BET_AMOUNT = (args.length >= 4 && isInteger(args[3]))? Integer.valueOf(args[3]): 100;
 
         Gson gson = new Gson();
         FileReader reader = null;
         try {
-            reader = new FileReader(filePath);
+            reader = new FileReader(FILE_PATH);
         } catch (FileNotFoundException e) {
-            System.out.println(("File " + filePath + " is not found. Please provide correct file name"));
+            System.out.println(("File " + FILE_PATH + " is not found. Please provide correct file name"));
             return;
         }
         Game game = gson.fromJson(reader, Game.class);
@@ -100,7 +102,7 @@ public class Main {
 
         double reward = 0;
         for (int i = 0; i < standardSymbols.size(); i++) {
-            reward += betAmount*standardRewards.get(standardSymbols.get(i))*
+            reward += BET_AMOUNT*standardRewards.get(standardSymbols.get(i))*
                     rewardForSameSymbols.getOrDefault(repeatsOfStandartSymbols.get(standardSymbols.get(i)), 0.0)*
                     Math.pow(rewardForSameSymbolsHorizontally, symbolsHorizontallyCounter.getOrDefault(standardSymbols.get(i), 0))*
                     Math.pow(rewardForSameSymbolsVertically, symbolsVerticallyCounter.getOrDefault(standardSymbols.get(i), 0))*
@@ -127,49 +129,8 @@ public class Main {
         }
 
 
-        System.out.println("{");
-        System.out.println(" matrix: [");
-        for (String[] row : matrix) {
-            System.out.print("  [");
-            for (int i = 0; i < row.length; i++) {
-                System.out.print(row[i] + ((i<row.length-1) ? ", ": ""));
-            }
-            System.out.println("],");
-        }
-        System.out.println(" ],");
-        System.out.print(" reward: " + reward);
-        if(reward>0) {
-            System.out.println(",");
-            System.out.println(" applied_winning_combinations: {");
-            repeatsOfStandartSymbols.forEach((symbol, repeat) -> {
-                if(rewardForSameSymbols.containsKey(repeat)) {
-                    System.out.print("  " + symbol + ": [same_symbol_" + repeat + "_times");
-                    if(symbolsHorizontallyCounter.containsKey(symbol)) {
-                        System.out.print(", same_symbols_horizontally");
-                    }
-                    if(symbolsVerticallyCounter.containsKey(symbol)) {
-                        System.out.print(", same_symbols_vertically");
-                    }
-                    if(symbolsDiagonallyLeftToRightCounter.containsKey(symbol)) {
-                        System.out.print(", same_symbols_diagonally_left_to_right");
-                    }
-                    if(symbolsDiagonallyRightToLeftCounter.containsKey(symbol)) {
-                        System.out.print(", same_symbols_diagonally_right_to_left");
-                    }
-                    System.out.println("]");
-                }
-            });
-            System.out.print(" }");
-            if(appliedBonusSymbols.size()>0) {
-                System.out.println(",");
-                System.out.print(" applied bonus symbol:");
-                for (int i = 0; i < appliedBonusSymbols.size(); i++) {
-                    System.out.print((i!=0?",":"") + " " + appliedBonusSymbols.get(i));
-                }
-            }
-        }
-        System.out.println();
-        System.out.println("}");
+        printOutput(reward, matrix, repeatsOfStandartSymbols, rewardForSameSymbols, symbolsHorizontallyCounter, symbolsVerticallyCounter,
+                symbolsDiagonallyLeftToRightCounter, symbolsDiagonallyRightToLeftCounter, appliedBonusSymbols);
     }
 
     private static boolean isInteger(String s) {
@@ -226,5 +187,55 @@ public class Main {
             }
         });
         return symbolsHorizontallyCounter;
+    }
+
+    private static void printOutput(double reward, String[][] matrix, Map<String, Integer> repeatsOfStandartSymbols,
+                                    Map<Integer, Double> rewardForSameSymbols, Map<String, Integer> symbolsHorizontallyCounter,
+                                    Map<String, Integer> symbolsVerticallyCounter, Map<String, Integer> symbolsDiagonallyLeftToRightCounter,
+                                    Map<String, Integer> symbolsDiagonallyRightToLeftCounter, List<String> appliedBonusSymbols) {
+        System.out.println("{");
+        System.out.println(" matrix: [");
+        for (int i = 0; i < matrix.length; i++) {
+            String[] row = matrix[i];
+            System.out.print("  [");
+            for (int j = 0; j < matrix[i].length; j++) {
+                System.out.print(matrix[i][j] + ((j < matrix[i].length - 1) ? ", " : ""));
+            }
+            System.out.println("]" + (i==matrix.length-1?"":","));
+        }
+        System.out.println(" ],");
+        System.out.print(" reward: " + reward);
+        if(reward>0) {
+            System.out.println(",");
+            System.out.println(" applied_winning_combinations: {");
+            repeatsOfStandartSymbols.forEach((symbol, repeat) -> {
+                if(rewardForSameSymbols.containsKey(repeat)) {
+                    System.out.print("  " + symbol + ": [same_symbol_" + repeat + "_times");
+                    if(symbolsHorizontallyCounter.containsKey(symbol)) {
+                        System.out.print(", same_symbols_horizontally");
+                    }
+                    if(symbolsVerticallyCounter.containsKey(symbol)) {
+                        System.out.print(", same_symbols_vertically");
+                    }
+                    if(symbolsDiagonallyLeftToRightCounter.containsKey(symbol)) {
+                        System.out.print(", same_symbols_diagonally_left_to_right");
+                    }
+                    if(symbolsDiagonallyRightToLeftCounter.containsKey(symbol)) {
+                        System.out.print(", same_symbols_diagonally_right_to_left");
+                    }
+                    System.out.println("]");
+                }
+            });
+            System.out.print(" }");
+            if(appliedBonusSymbols.size()>0) {
+                System.out.println(",");
+                System.out.print(" applied bonus symbol:");
+                for (int i = 0; i < appliedBonusSymbols.size(); i++) {
+                    System.out.print((i!=0?",":"") + " " + appliedBonusSymbols.get(i));
+                }
+            }
+        }
+        System.out.println();
+        System.out.println("}");
     }
 }
