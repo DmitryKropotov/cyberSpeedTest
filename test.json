@@ -1,5 +1,5 @@
 {
-  "columns": 3,
+  "columns": 2,
   "rows": 3,
   "symbols": {
     "A": {
@@ -78,80 +78,8 @@
         }
       },
       {
-        "column": 0,
-        "row": 2,
-        "symbols": {
-          "A": 1,
-          "B": 2,
-          "C": 3,
-          "D": 4,
-          "E": 5,
-          "F": 6
-        }
-      },
-      {
         "column": 1,
         "row": 0,
-        "symbols": {
-          "A": 1,
-          "B": 2,
-          "C": 3,
-          "D": 4,
-          "E": 5,
-          "F": 6
-        }
-      },
-      {
-        "column": 1,
-        "row": 1,
-        "symbols": {
-          "A": 1,
-          "B": 2,
-          "C": 3,
-          "D": 4,
-          "E": 5,
-          "F": 6
-        }
-      },
-      {
-        "column": 1,
-        "row": 2,
-        "symbols": {
-          "A": 1,
-          "B": 2,
-          "C": 3,
-          "D": 4,
-          "E": 5,
-          "F": 6
-        }
-      },
-      {
-        "column": 2,
-        "row": 0,
-        "symbols": {
-          "A": 1,
-          "B": 2,
-          "C": 3,
-          "D": 4,
-          "E": 5,
-          "F": 6
-        }
-      },
-      {
-        "column": 2,
-        "row": 1,
-        "symbols": {
-          "A": 1,
-          "B": 2,
-          "C": 3,
-          "D": 4,
-          "E": 5,
-          "F": 6
-        }
-      },
-      {
-        "column": 2,
-        "row": 2,
         "symbols": {
           "A": 1,
           "B": 2,
@@ -173,46 +101,22 @@
     }
   },
   "win_combinations": {
-    "same_symbol_3_times": {
+    "same_symbol_2_times": {
       "reward_multiplier": 1,
+      "when": "same_symbols",
+      "count": 2,
+      "group": "same_symbols"
+    },
+    "same_symbol_3_times": {
+      "reward_multiplier": 1.5,
       "when": "same_symbols",
       "count": 3,
       "group": "same_symbols"
     },
     "same_symbol_4_times": {
-      "reward_multiplier": 1.5,
-      "when": "same_symbols",
-      "count": 4,
-      "group": "same_symbols"
-    },
-    "same_symbol_5_times": {
       "reward_multiplier": 2,
       "when": "same_symbols",
-      "count": 5,
-      "group": "same_symbols"
-    },
-    "same_symbol_6_times": {
-      "reward_multiplier": 3,
-      "when": "same_symbols",
-      "count": 6,
-      "group": "same_symbols"
-    },
-    "same_symbol_7_times": {
-      "reward_multiplier": 5,
-      "when": "same_symbols",
-      "count": 7,
-      "group": "same_symbols"
-    },
-    "same_symbol_8_times": {
-      "reward_multiplier": 10,
-      "when": "same_symbols",
-      "count": 8,
-      "group": "same_symbols"
-    },
-    "same_symbol_9_times": {
-      "reward_multiplier": 20,
-      "when": "same_symbols",
-      "count": 9,
+      "count": 4,
       "group": "same_symbols"
     },
     "same_symbols_horizontally": {
@@ -222,18 +126,11 @@
       "covered_areas": [
         [
           "0:0",
-          "0:1",
-          "0:2"
+          "0:1"
         ],
         [
           "1:0",
-          "1:1",
-          "1:2"
-        ],
-        [
-          "2:0",
-          "2:1",
-          "2:2"
+          "1:1"
         ]
       ]
     },
@@ -244,18 +141,11 @@
       "covered_areas": [
         [
           "0:0",
-          "1:0",
-          "2:0"
+          "1:0"
         ],
         [
           "0:1",
-          "1:1",
-          "2:1"
-        ],
-        [
-          "0:2",
-          "1:2",
-          "2:2"
+          "1:1"
         ]
       ]
     },
@@ -266,8 +156,7 @@
       "covered_areas": [
         [
           "0:0",
-          "1:1",
-          "2:2"
+          "1:1"
         ]
       ]
     },
@@ -277,9 +166,8 @@
       "group": "rtl_diagonally_linear_symbols",
       "covered_areas": [
         [
-          "0:2",
-          "1:1",
-          "2:0"
+          "0:1",
+          "1:0"
         ]
       ]
     }

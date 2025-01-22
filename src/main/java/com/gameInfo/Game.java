@@ -1,5 +1,4 @@
 package com.gameInfo;
-
 import java.util.Map;
 
 public class Game {
@@ -7,7 +6,7 @@ public class Game {
     private int rows;
     private Map<String, SymbolDetails> symbols;
     private Probabilities probabilities;
-    private WinCombination win_combinations;
+    private Map<String, WinCombination> win_combinations;
 
     public int getColumns() {
         return columns;
@@ -25,7 +24,7 @@ public class Game {
         return probabilities;
     }
 
-    public WinCombination getWin_combinations() {
+    public Map<String, WinCombination> getWin_combinations() {
         return win_combinations;
     }
 }

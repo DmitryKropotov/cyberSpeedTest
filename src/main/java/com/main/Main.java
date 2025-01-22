@@ -1,16 +1,12 @@
 package com.main;
 
 import com.gameInfo.*;
-import com.google.gson.Gson;
-
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
-import java.security.SecureRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import com.google.gson.Gson;
 
 public class Main {
     public static void main(String[] args) {
@@ -30,11 +26,11 @@ public class Main {
         Map<String, Double> standardRewards = new HashMap<>();
         Map<String, Double> bonusRewardsMultiply = new HashMap<>();
         Map<String, Integer> bonusRewardsAdd = new HashMap<>();
-        Map<String, Integer> repeatsOfStandartSymbols = new HashMap<>();
+        Map<String, Integer> repeatsOfStandardSymbols = new HashMap<>();
         game.getSymbols().entrySet().forEach(entry -> {
             if(entry.getValue().getType().equals("standard")) {
                 standardRewards.put(entry.getKey(), entry.getValue().getReward_multiplier());
-                repeatsOfStandartSymbols.put(entry.getKey(), 0);
+                repeatsOfStandardSymbols.put(entry.getKey(), 0);
             } else if(entry.getValue().getType().equals("bonus")) {
                 if(entry.getKey().contains("x")) {
                     bonusRewardsMultiply.put(entry.getKey(), entry.getValue().getReward_multiplier());
@@ -47,12 +43,13 @@ public class Main {
         List<String> bonusMultiplySymbols = bonusRewardsMultiply.keySet().stream().collect(Collectors.toList());
         List<String> bonusAddSymbols = bonusRewardsAdd.keySet().stream().collect(Collectors.toList());
 
-        String[][] matrix = new String[game.getRows()][game.getColumns()];
+        String[][] matrix = new String[game.getColumns()][game.getRows()];
+        //standard symbols
         StandardSymbols[] probabilitiesOfStandardSymbols = game.getProbabilities().getStandard_symbols();
         for (StandardSymbols standardSymbol : probabilitiesOfStandardSymbols) {
-            matrix[standardSymbol.getRow()][standardSymbol.getColumn()] = generateSymbol(standardSymbol);
-            repeatsOfStandartSymbols.put(matrix[standardSymbol.getRow()][standardSymbol.getColumn()],
-                    repeatsOfStandartSymbols.get(matrix[standardSymbol.getRow()][standardSymbol.getColumn()])+1);
+            matrix[standardSymbol.getColumn()][standardSymbol.getRow()] = generateSymbol(standardSymbol);
+            repeatsOfStandardSymbols.put(matrix[standardSymbol.getColumn()][standardSymbol.getRow()],
+                    repeatsOfStandardSymbols.get(matrix[standardSymbol.getColumn()][standardSymbol.getRow()])+1);
         }
 
         //bonus Symbols
@@ -75,24 +72,41 @@ public class Main {
         }
 
         Map<Integer, Double> rewardForSameSymbols = new HashMap<>();
-        WinCombination winCombination = game.getWin_combinations();
-        rewardForSameSymbols.put(3, (Double)winCombination.getSame_symbol_3_times().get("reward_multiplier"));
-        rewardForSameSymbols.put(4, (Double)winCombination.getSame_symbol_4_times().get("reward_multiplier"));
-        rewardForSameSymbols.put(5, (Double)winCombination.getSame_symbol_5_times().get("reward_multiplier"));
-        rewardForSameSymbols.put(6, (Double)winCombination.getSame_symbol_6_times().get("reward_multiplier"));
-        rewardForSameSymbols.put(7, (Double)winCombination.getSame_symbol_7_times().get("reward_multiplier"));
-        rewardForSameSymbols.put(8, (Double)winCombination.getSame_symbol_8_times().get("reward_multiplier"));
-        rewardForSameSymbols.put(9, (Double)winCombination.getSame_symbol_9_times().get("reward_multiplier"));
+        Map<String, WinCombination> winCombination = game.getWin_combinations();
 
+        double rewardForSameSymbolsHorizontally = 0;
+        List<List<String>> coveredAreasHorizontally = new ArrayList<>();
+        double rewardForSameSymbolsVertically = 0;
+        List<List<String>> coveredAreasVertically = new ArrayList<>();
+        double rewardForSameSymbolsDiagonallyLeftToRight = 0;
+        List<List<String>> coveredAreasDiagonallyLeftToRight = new ArrayList<>();
+        double rewardForSameSymbolsDiagonallyRightToLeft = 0;
+        List<List<String>> coveredAreasDiagonallyRightToLeft = new ArrayList<>();
 
-        double rewardForSameSymbolsHorizontally = (double)winCombination.getSame_symbols_horizontally().get("reward_multiplier");
-        List<List<String>> coveredAreasHorizontally = (List<List<String>>) winCombination.getSame_symbols_horizontally().get("covered_areas");
-        double rewardForSameSymbolsVertically = (double)winCombination.getSame_symbols_vertically().get("reward_multiplier");
-        List<List<String>> coveredAreasVertically = (List<List<String>>) winCombination.getSame_symbols_vertically().get("covered_areas");
-        double rewardForSameSymbolsDiagonallyLeftToRight = (double)winCombination.getSame_symbols_diagonally_left_to_right().get("reward_multiplier");
-        List<List<String>> coveredAreasDiagonallyLeftToRight = (List<List<String>>) winCombination.getSame_symbols_diagonally_left_to_right().get("covered_areas");
-        double rewardForSameSymbolsDiagonallyRightToLeft = (double)winCombination.getSame_symbols_diagonally_right_to_left().get("reward_multiplier");
-        List<List<String>> coveredAreasDiagonallyRightToLeft = (List<List<String>>) winCombination.getSame_symbols_diagonally_right_to_left().get("covered_areas");
+        for (Map.Entry<String, WinCombination> entry : winCombination.entrySet()) {
+            String combinationName = entry.getKey();
+            WinCombination combination = entry.getValue();
+            if (combinationName.matches("same_symbol_(\\d+)_times")) {
+                rewardForSameSymbols.put(combination.getCount(), combination.getReward_multiplier());
+            }
+            if (combinationName.equals("same_symbols_horizontally")) {
+                rewardForSameSymbolsHorizontally = combination.getReward_multiplier();
+                coveredAreasHorizontally = combination.getCoveredAreas();
+            }
+            if (combinationName.equals("same_symbols_vertically")) {
+                rewardForSameSymbolsVertically = combination.getReward_multiplier();
+                coveredAreasVertically = combination.getCoveredAreas();
+            }
+            if (combinationName.equals("same_symbols_diagonally_left_to_right")) {
+                rewardForSameSymbolsDiagonallyLeftToRight = combination.getReward_multiplier();
+                coveredAreasDiagonallyLeftToRight = combination.getCoveredAreas();
+            }
+            if (combinationName.equals("same_symbols_diagonally_right_to_left")) {
+                rewardForSameSymbolsDiagonallyRightToLeft = combination.getReward_multiplier();
+                coveredAreasDiagonallyRightToLeft = combination.getCoveredAreas();
+            }
+        }
+
 
         Map<String, Integer> symbolsHorizontallyCounter = countPatternMatchForSymbols(coveredAreasHorizontally, standardSymbols, matrix);
         Map<String, Integer> symbolsVerticallyCounter = countPatternMatchForSymbols(coveredAreasVertically, standardSymbols, matrix);
@@ -103,7 +117,7 @@ public class Main {
         double reward = 0;
         for (int i = 0; i < standardSymbols.size(); i++) {
             reward += BET_AMOUNT*standardRewards.get(standardSymbols.get(i))*
-                    rewardForSameSymbols.getOrDefault(repeatsOfStandartSymbols.get(standardSymbols.get(i)), 0.0)*
+                    rewardForSameSymbols.getOrDefault(repeatsOfStandardSymbols.get(standardSymbols.get(i)), 0.0)*
                     Math.pow(rewardForSameSymbolsHorizontally, symbolsHorizontallyCounter.getOrDefault(standardSymbols.get(i), 0))*
                     Math.pow(rewardForSameSymbolsVertically, symbolsVerticallyCounter.getOrDefault(standardSymbols.get(i), 0))*
                     Math.pow(rewardForSameSymbolsDiagonallyLeftToRight, symbolsDiagonallyLeftToRightCounter.getOrDefault(standardSymbols.get(i), 0))*
@@ -129,7 +143,7 @@ public class Main {
         }
 
 
-        printOutput(reward, matrix, repeatsOfStandartSymbols, rewardForSameSymbols, symbolsHorizontallyCounter, symbolsVerticallyCounter,
+        printOutput(reward, matrix, repeatsOfStandardSymbols, rewardForSameSymbols, symbolsHorizontallyCounter, symbolsVerticallyCounter,
                 symbolsDiagonallyLeftToRightCounter, symbolsDiagonallyRightToLeftCounter, appliedBonusSymbols);
     }
 
@@ -196,7 +210,6 @@ public class Main {
         System.out.println("{");
         System.out.println(" matrix: [");
         for (int i = 0; i < matrix.length; i++) {
-            String[] row = matrix[i];
             System.out.print("  [");
             for (int j = 0; j < matrix[i].length; j++) {
                 System.out.print(matrix[i][j] + ((j < matrix[i].length - 1) ? ", " : ""));
@@ -227,7 +240,7 @@ public class Main {
                 }
             });
             System.out.print(" }");
-            if(appliedBonusSymbols.size()>0) {
+            if(!appliedBonusSymbols.isEmpty()) {
                 System.out.println(",");
                 System.out.print(" applied bonus symbol:");
                 for (int i = 0; i < appliedBonusSymbols.size(); i++) {

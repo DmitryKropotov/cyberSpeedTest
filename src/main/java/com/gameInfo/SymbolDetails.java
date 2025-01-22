@@ -1,10 +1,10 @@
 package com.gameInfo;
 
 public class SymbolDetails {
-    double reward_multiplier;
-    int extra;
-    String type;
-    String impact;
+    private double reward_multiplier;
+    private int extra;
+    private String type;
+    private String impact;
 
     public double getReward_multiplier() {
         return reward_multiplier;
