@@ -1,6 +1,4 @@
 {
-  "columns": 2,
-  "rows": 3,
   "symbols": {
     "A": {
       "reward_multiplier": 5,
@@ -79,6 +77,18 @@
       },
       {
         "column": 1,
+        "row": 0,
+        "symbols": {
+          "A": 1,
+          "B": 2,
+          "C": 3,
+          "D": 4,
+          "E": 5,
+          "F": 6
+        }
+      },
+      {
+        "column": 2,
         "row": 0,
         "symbols": {
           "A": 1,

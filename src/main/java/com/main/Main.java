@@ -39,11 +39,15 @@ public class Main {
                 }
             }
         });
-        List<String> standardSymbols = standardRewards.keySet().stream().collect(Collectors.toList());
-        List<String> bonusMultiplySymbols = bonusRewardsMultiply.keySet().stream().collect(Collectors.toList());
-        List<String> bonusAddSymbols = bonusRewardsAdd.keySet().stream().collect(Collectors.toList());
+        List<String> standardSymbols = new ArrayList<>(standardRewards.keySet());
 
-        String[][] matrix = new String[game.getColumns()][game.getRows()];
+        String[][] matrix;
+        if(game.getColumns() == 0 || game.getRows() == 0) {
+            int[] result = calculateColumnsAndRows(game.getProbabilities().getStandard_symbols());
+            matrix = new String[result[0]][result[1]];
+        } else {
+            matrix = new String[game.getColumns()][game.getRows()];
+        }
         //standard symbols
         StandardSymbols[] probabilitiesOfStandardSymbols = game.getProbabilities().getStandard_symbols();
         for (StandardSymbols standardSymbol : probabilitiesOfStandardSymbols) {
@@ -145,6 +149,16 @@ public class Main {
 
         printOutput(reward, matrix, repeatsOfStandardSymbols, rewardForSameSymbols, symbolsHorizontallyCounter, symbolsVerticallyCounter,
                 symbolsDiagonallyLeftToRightCounter, symbolsDiagonallyRightToLeftCounter, appliedBonusSymbols);
+    }
+
+    private static int[] calculateColumnsAndRows(StandardSymbols[] standardSymbols) {
+        int columns = 2;
+        int rows = 2;
+        for (StandardSymbols s : standardSymbols) {
+            rows = Math.max(rows, s.getRow()+1);
+            columns = Math.max(columns, s.getColumn()+1);
+        }
+        return new int[] {columns, rows};
     }
 
     private static boolean isInteger(String s) {
