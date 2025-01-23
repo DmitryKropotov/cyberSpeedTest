@@ -98,6 +98,48 @@ public class MainTest {
     }
 
     @Test
+    public void NonSquareMatrixTest() {
+        Path resourceDirectory = Paths.get("src","test","resources", "nonSquareMatrixTest.json");
+        String absolutePath = resourceDirectory.toFile().getAbsolutePath();
+        String[] args = {"--config", absolutePath, "--betting-amount", "not number"};
+        Main.main(args);
+        StringBuilder expected = new StringBuilder();
+        expected.append("{\r\n");
+        expected.append(" matrix: [\r\n");
+        expected.append("  [A, A],\r\n");
+        expected.append("  [A, MISS],\r\n");
+        expected.append("  [A, MISS]\r\n");
+        expected.append(" ],\r\n");
+        expected.append(" reward: 20000.0,\r\n");
+        expected.append(" applied_winning_combinations: {\r\n");
+        expected.append("  A: [same_symbol_4_times, same_symbols_horizontally, same_symbols_vertically, same_symbols_diagonally_right_to_left]\r\n");
+        expected.append(" }\r\n");
+        expected.append("}\r\n");
+        assertTrue(outputStreamCaptor.toString().trim().equals(expected.toString().trim()));
+    }
+
+    @Test
+    public void noRowAndColumnTest() {
+        Path resourceDirectory = Paths.get("src","test","resources", "noRowAndColumnTest.json");
+        String absolutePath = resourceDirectory.toFile().getAbsolutePath();
+        String[] args = {"--config", absolutePath, "--betting-amount", "not number"};
+        Main.main(args);
+        StringBuilder expected = new StringBuilder();
+        expected.append("{\r\n");
+        expected.append(" matrix: [\r\n");
+        expected.append("  [A, A, A],\r\n");
+        expected.append("  [A, MISS, MISS]\r\n");
+        expected.append(" ],\r\n");
+        expected.append(" reward: 20000.0,\r\n");
+        expected.append(" applied_winning_combinations: {\r\n");
+        expected.append("  A: [same_symbol_4_times, same_symbols_horizontally, same_symbols_vertically, same_symbols_diagonally_right_to_left]\r\n");
+        expected.append(" }\r\n");
+        expected.append("}\r\n");
+        String result = outputStreamCaptor.toString().trim();
+        assertTrue(outputStreamCaptor.toString().trim().equals(expected.toString().trim()));
+    }
+
+    @Test
     public void FileDoesntExistTest() {
         String[] args = {"--config", "NotExistingFile.json", "--betting-amount", "200"};
         Main.main(args);
